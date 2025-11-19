@@ -1,0 +1,74 @@
+version: '3.1'
+
+services:
+  mongo:
+    image: mongo
+    restart: always
+    container_name: mongo-1
+    environment:
+       MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USERNAME} 
+       MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD} 
+    ports:
+      - 27017:27017
+    volumes:
+      - mongo_data:/data/db
+      - mongo_config:/data/configdb
+    networks:
+      - backend 
+ 
+  authentication:
+    build:
+      context: .
+      dockerfile: Dockerfile.authentication
+    image: authentication
+    container_name: authentication
+    restart: always
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      MONGODB_URI: mongodb://${MONGODB_USERNAME:-root}:${MONGODB_PASSWORD:-root}@mongo:27017/authentication?authSource=admin
+    depends_on:
+      - mongo
+    ports:
+      - "3001:3001"
+    networks:
+      - backend
+  
+  gateway: 
+    build: 
+      context: .
+      dockerfile: Dockerfile.gateway
+    image: gateway
+    container_name: gateway
+    restart: always
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      AUTH_HOST: authentication
+      PORT: 3000
+      AUTH_SERVICE_HOST: authentication
+      AUTH_SERVICE_PORT: 3001
+    depends_on:
+      - authentication
+    ports:
+      - "3000:3000"
+    networks:
+      - backend
+
+volumes:
+  mongo_data:
+    driver: local
+  mongo_config:
+    driver: local
+
+networks:
+  backend:
+    driver: bridge
+
+
+
+
+

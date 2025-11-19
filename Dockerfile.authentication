@@ -1,0 +1,8 @@
+FROM node:23.6.1
+WORKDIR /usr/src/app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build authentication
+EXPOSE 3001
+CMD ["node", "dist/apps/authentication/main.js"]
