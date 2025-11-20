@@ -7,7 +7,6 @@ import {
 } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { firstValueFrom, catchError } from 'rxjs';
-import { throwError } from 'rxjs';
 import { RegisterUserDto } from '../../../common/dtos/register-user.dto';
 import { UserResponseRto } from '../../../common/rtos/user-response.rto';
 import { SignInUserDTO } from 'common/dtos/sign-in-user.dto';

@@ -185,7 +185,7 @@ When using Docker Compose, the following environment variables are used:
 
 #### 1. Start MongoDB
 
-use Docker to run only MongoDB:
+Use Docker to run only MongoDB:
 
 ```bash
 docker-compose up mongo -d
@@ -194,7 +194,7 @@ docker-compose up mongo -d
 #### 2. Start Authentication Service
 
 ```bash
-npm run start:dev authentication
+nest start authentication --watch
 ```
 
 The service will start on TCP port 3001.
@@ -204,7 +204,7 @@ The service will start on TCP port 3001.
 In a new terminal:
 
 ```bash
-npm run start:dev gateway
+nest start gateway --watch
 ```
 
 The gateway will start on HTTP port 3000.
@@ -231,18 +231,20 @@ docker-compose down -v
 npm run build
 
 # Build specific application
-npm run build gateway
-npm run build authentication
+nest build gateway
+nest build authentication
 
-# Development mode (watch mode)
+# Development mode (watch mode) - starts default project (gateway)
 npm run start:dev
 
-# Start specific service
-npm run start:dev gateway
-npm run start:dev authentication
+# Start specific service in development mode
+nest start gateway --watch
+nest start authentication --watch
 
-# Production mode
-npm run start:prod
+# Production mode (requires building first)
+npm run build
+node dist/apps/gateway/main.js
+node dist/apps/authentication/main.js
 
 # Linting
 npm run lint
@@ -297,7 +299,7 @@ Content-Type: application/json
 }
 ```
 
-**Response (200 OK):**
+**Response (201 Created):**
 ```json
 {
   "id": "507f1f77bcf86cd799439011",
@@ -448,6 +450,7 @@ docker-compose exec [service-name] [command]
 docker-compose down -v
 ```
 
+## 💻 Development
 
 ### Adding New Features
 
@@ -497,13 +500,18 @@ async newEndpoint(@Body() dto: SomeDto) {
 If you get a port already in use error:
 
 ```bash
-# Find process using port
+# Find process using port (macOS/Linux)
 lsof -i :3000  # Gateway
 lsof -i :3001  # Authentication
 lsof -i :27017 # MongoDB
 
 # Kill process
 kill -9 <PID>
+
+# Alternative (macOS/Linux)
+kill $(lsof -t -i:3000)  # Gateway
+kill $(lsof -t -i:3001)  # Authentication
+kill $(lsof -t -i:27017) # MongoDB
 ```
 
 ### MongoDB Connection Issues
@@ -516,8 +524,9 @@ kill -9 <PID>
 ### Microservice Communication Issues
 
 - Ensure Authentication service is running before Gateway
-- Check `AUTH_HOST` and `AUTH_TCP_PORT` environment variables
+- Check `AUTH_HOST` and `AUTH_TCP_PORT` environment variables in `.env` file
 - Verify TCP port is not blocked by firewall
+- When running in Docker, use service names (e.g., `authentication`) instead of `localhost` for `AUTH_HOST`
 
 ### Docker Issues
 
